@@ -86,3 +86,36 @@ namespace LeaveManagement.Web.Controllers
             if (id != leaveTypeVM.Id)
             {
                 return NotFound();
+            }
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var leaveType = mapper.Map<LeaveType>(leaveTypeVM);
+                    await leaveTypeRepository.UpdateAsync(leaveType);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!await leaveTypeRepository.Exists(leaveTypeVM.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(leaveTypeVM);
+        }
+        // POST: LeaveTypes/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await leaveTypeRepository.DeleteAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}
